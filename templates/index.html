@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Join you up dat hackspace!{% endblock %}
+
+{% block content %}
+        <div class="span8 offset2">
+          <h1>Join you up dat hackspace!</h1>
+          <form method="POST" action="." class="form-horizontal">
+            {{ form.csrf_token }}
+            {% for field in form %}
+              {% if field != form.csrf_token %}
+                {% with errors = form.errors.get(field.name, []) %}
+                  <div class="control-group{% if errors %} error{% endif %}">
+                    <div class="control-label" for="{{ field.name }}">{{ field.label }}</div>
+                    <div class="controls">
+                      {{ field }}
+                      {% for error in errors %}
+                        <span class="help-inline">{{ error }}</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endwith %}
+              {% endif %}
+            {% endfor %}
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">I iz want becum membrar</button>
+            </div>
+          </form>
+        </div>
+{% endblock %}
