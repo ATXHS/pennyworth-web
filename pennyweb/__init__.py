@@ -1,9 +1,13 @@
 from flask import Flask, render_template
+from flask.ext.debugtoolbar import DebugToolbarExtension
 from flask.ext.wtf import Email, Form, TextField, Required
 
-app = Flask(__name__)
-app.secret_key = 'jmnkovbdfhnvgr8vnioh389gvbh839b h'
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_object('pennyweb.default_settings')
+app.config.from_pyfile('pennyweb.cfg')
 
+# Debug toolbar
+toolbar = DebugToolbarExtension(app)
 
 class InvoiceForm(Form):
     first_name = TextField('first name', [Required()])
@@ -31,7 +35,3 @@ def index():
 @app.route('/success')
 def success():
     return render_template('success.html')
-
-
-if __name__ == '__main__':
-    app.run(debug=True)

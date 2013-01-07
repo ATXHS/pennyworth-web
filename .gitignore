@@ -1,0 +1,4 @@
+.pyflymakercc
+*.pyc
+pennyweb.egg-info
+instance
