@@ -7,9 +7,9 @@
   <body>
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <div class="row-fluid">
+        <div class="row-fluid messages">
           {% for message in messages %}
-            <div class="span8 offset2">{{ messagse }}</div>
+            <div class="span8 offset2">{{ message }}</div>
           {% endfor %}
         </div>
       {% endif %}

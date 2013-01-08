@@ -1,7 +1,8 @@
 from pennyweb import app
+from pennyweb.models import create_invoice, ClientAlreadyExists
 
 from flask import flash, redirect, render_template, url_for
-from flask.ext.wtf import Email, Form, Required, SelectField, TextField
+from flask.ext.wtf import Email, Form, Required, RadioField, TextField
 
 
 class InvoiceForm(Form):
@@ -18,17 +19,26 @@ class InvoiceForm(Form):
     p_state = TextField('state', [Required()])
     p_code = TextField('zip', [Required()])
 
-    payment_type = SelectField('payment type', default='subscription',
-                               choices=[('', ''), ('', '')])
+    payment_type = RadioField(
+        'payment type', default='monthly',
+        choices=[('monthly', 'Monthly auto-pay ($50/month)'),
+                 ('onetime', 'Monthly manual-pay ($75/month)')])
 
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
     form = InvoiceForm()
     if form.validate_on_submit():
-        flash('Success!')
-        return redirect(url_for('success'))
+        try:
+            create_invoice(form)
+            flash('Success!')
+            return redirect(url_for('success'))
+        except ClientAlreadyExists:
+            flash('The specified email address already exists in our system. '
+                  'Contact treasurer@atxhackerspace.org.')
+            return render_template('index.html', form=form)
     return render_template('index.html', form=form)
+
 
 @app.route('/success')
 def success():
