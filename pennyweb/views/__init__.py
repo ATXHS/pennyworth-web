@@ -1,8 +1,8 @@
-from pennyweb import app, request
+from pennyweb import app
 from pennyweb.models import create_invoice, ClientAlreadyExists,\
     verify_callback, payment_callback
 
-from flask import flash, redirect, render_template, url_for
+from flask import flash, redirect, request, render_template, url_for
 from flask.ext.wtf import Email, Form, Required, TextField
 
 
