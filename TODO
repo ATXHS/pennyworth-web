@@ -8,3 +8,9 @@
   discount if it's not already done (maybe one or the other only,
   since we don't want to double-discount).
 
+** TODO Write authorize.net auto-refunder
+   Because we can't add discounts via FreshBooks, we'll have to do it
+   via Authorize.net instead. We should be able to take the the ref
+   number in the invoice/payment and fetch the payment from Auth.net,
+   then give a partial discount? At that point, we can edit the FB
+   payment, then the FB invoice.
