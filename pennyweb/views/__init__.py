@@ -41,7 +41,7 @@ def success():
     return render_template('success.html')
 
 
-@app.route('/freshbooks_webhook')
+@app.route('/freshbooks_webhook', methods=('POST',))
 def freshbooks_webhook():
     name = request.form.get('name')
     if name == 'callback.verify':
