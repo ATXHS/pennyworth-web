@@ -2,3 +2,4 @@
 *.pyc
 pennyweb.egg-info
 instance
+*~
