@@ -90,6 +90,7 @@ def verify_callback(data):
 
 
 def payment_callback(data):
+    app.logger.debug(data)
     c = get_client()
     recurring_id = data['object_id']
     response = c.recurring.get(recurring_id=20)
