@@ -24,7 +24,7 @@ def create_invoice(form):
     # If so, don't allow an invoice to be made
     if int(response.clients.attrib['total']) > 0:
         app.logger.debug(
-            'Client already exists with email {} (checked for {})'.format(
+            'Client already exists with email {0} (checked for {1})'.format(
                 response.clients.client[0].email, form.email.data))
         raise ClientAlreadyExists()
 
@@ -48,7 +48,7 @@ def create_invoice(form):
     lines = [
         api.types.line(
             name='ATXDUES', unit_cost='75', quantity='1',
-            description='$75 Dues for the month of {}'.format(month)
+            description='$75 Dues for the month of {0}'.format(month)
         )
     ]
     invoice=dict(
