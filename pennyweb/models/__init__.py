@@ -1,5 +1,6 @@
 from datetime import datetime
 from refreshbooks import api
+from flask import url_for
 from pennyweb import app
 
 
@@ -72,7 +73,7 @@ def install_webhooks():
     c = get_client()
     response = c.callback.create(callback=dict(
         event='payment.create',
-        uri=app.url_for('freshbooks_webhook', _external=True)
+        uri=url_for('freshbooks_webhook', _external=True)
     ))
     if response.attrib['status'] == 'ok':
         print 'webhook created successfully'
