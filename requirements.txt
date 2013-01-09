@@ -2,4 +2,5 @@ refreshbooks
 requests
 Flask
 Flask-DebugToolbar
+Flask-Script
 Flask-WTF

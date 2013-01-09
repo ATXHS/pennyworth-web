@@ -1,28 +1,24 @@
-from pennyweb import app
-from pennyweb.models import create_invoice, ClientAlreadyExists
+from pennyweb import app, request
+from pennyweb.models import create_invoice, ClientAlreadyExists,\
+    verify_callback, payment_callback
 
 from flask import flash, redirect, render_template, url_for
-from flask.ext.wtf import Email, Form, Required, RadioField, TextField
+from flask.ext.wtf import Email, Form, Required, TextField
 
 
 class InvoiceForm(Form):
-    first_name = TextField('first name', [Required()])
-    last_name = TextField('last name', [Required()])
-    email = TextField('email', [Required(), Email()])
+    first_name = TextField('first name *', [Required()])
+    last_name = TextField('last name *', [Required()])
+    email = TextField('email *', [Required(), Email()])
     home_phone = TextField('home phone')
     mobile = TextField('mobile phone')
 
     # primary address
-    p_street1 = TextField('address 1', [Required()])
+    p_street1 = TextField('address 1 *', [Required()])
     p_street2 = TextField('address 2')
-    p_city = TextField('city', [Required()])
-    p_state = TextField('state', [Required()])
-    p_code = TextField('zip', [Required()])
-
-    payment_type = RadioField(
-        'payment type', default='monthly',
-        choices=[('monthly', 'Monthly auto-pay ($50/month)'),
-                 ('onetime', 'Monthly manual-pay ($75/month)')])
+    p_city = TextField('city *', [Required()])
+    p_state = TextField('state *', [Required()])
+    p_code = TextField('zip *', [Required()])
 
 
 @app.route('/', methods=('GET', 'POST'))
@@ -43,3 +39,13 @@ def index():
 @app.route('/success')
 def success():
     return render_template('success.html')
+
+
+@app.route('/freshbooks_webhook')
+def freshbooks_webhook():
+    name = request.form.get('name')
+    if name == 'callback.verify':
+        verify_callback(request.form)
+    elif name == 'payment.create':
+        payment_callback(request.form)
+    return 'ok'

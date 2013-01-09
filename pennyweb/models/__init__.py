@@ -34,9 +34,6 @@ def create_invoice(form):
         p_street1=form.p_street1.data, p_street2=form.p_street2.data,
         p_city=form.p_city.data, p_state=form.p_state.data,
         p_code=form.p_code.data, p_country='United States',
-        notes=('Signed up for monthly auto-pay ($50/month)'
-               if form.payment_type.data == 'monthly' else
-               'Signed up for monthly manual-pay ($75/month)')
     )
     if form.home_phone.data:
         client['home_phone'] = form.home_phone.data
@@ -53,11 +50,6 @@ def create_invoice(form):
             description='$75 Dues for the month of {}'.format(month)
         )
     ]
-    if form.payment_type.data == 'monthly':
-        lines.append(api.types.line(
-            name='AUTOPAY', unit_cost='-25', quantity='1',
-            description='$25 discount for Auto-Pay'
-        ))
     invoice=dict(
         client_id=client_id,
         lines=lines,
@@ -73,3 +65,39 @@ treasurer@atxhackerspace.org
 (512) 553-3917
 """)
     response = c.recurring.create(recurring=invoice)
+
+
+def install_webhooks():
+    print 'installing hooks...'
+    c = get_client()
+    response = c.callback.create(callback=dict(
+        event='payment.create',
+        uri=app.url_for('freshbooks_webhook', _external=True)
+    ))
+    if response.attrib['status'] == 'ok':
+        print 'webhook created successfully'
+    else:
+        print 'failed to add webhook'
+
+
+def verify_callback(data):
+    c = get_client()
+    c.callback.verify(callback=dict(
+        callback_id=data['object_id'],
+        verifier=data['verifier']
+    ))
+
+
+def payment_callback(data):
+    c = get_client()
+    recurring_id = data['object_id']
+    response = c.recurring.get(recurring_id=20)
+
+    if hasattr(response.recurring, 'autobill'):
+        response = c.recurring.lines.add(
+            recurring_id=recurring_id,
+            lines=[api.types.line(
+                name='AUTOPAY', unit_cost='-25', quantity='1',
+                description='$25 discount for Auto-Pay'
+            )]
+        )

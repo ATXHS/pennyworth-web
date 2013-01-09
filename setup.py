@@ -6,4 +6,10 @@ setup(
     #install_requires = ["xmleater >= 0.1", "oauth >= 1.0"],
 
     description = "Web app for hackerspace membership stuff.",
+
+    entry_points = {
+        'console_scripts': [
+            'manage-pennyweb = pennyweb.manage:main'
+        ]
+    }
 )

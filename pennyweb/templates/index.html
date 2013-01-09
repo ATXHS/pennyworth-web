@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Join you up dat hackspace!{% endblock %}
+{% block title %}Join ATX Hackerspace!{% endblock %}
 
 {% block content %}
         <div class="span8 offset2">
-          <h1>Join you up dat hackspace!</h1>
+          <h1>Join ATX Hackerspace!</h1>
           <form method="POST" action="." class="form-horizontal">
             {{ form.csrf_token }}
             {% for field in form %}
               {% if field != form.csrf_token %}
                 {% with errors = form.errors.get(field.name, []) %}
                   <div class="control-group{% if errors %} error{% endif %}">
-                    <div class="control-label" for="{{ field.name }}">{{ field.label }}{% if field.flags.required %}*{% endif %}</div>
+                    <div class="control-label" for="{{ field.name }}">{{ field.label }}</div>
                     <div class="controls">
                       {{ field }}
                       {% for error in errors %}
@@ -22,8 +22,16 @@
                 {% endwith %}
               {% endif %}
             {% endfor %}
+            <div>
+              You will be sent an monthly recurring invoice for
+              $75. <b>If you would like a discount of $25 a month, select
+              the auto-pay option when you are making your first
+              payment</b>, and you will automatically be refunded $25 for
+              your first month, and the $25 discount will
+              automatically be applied every month thereafter.
+            </div>
             <div class="form-actions">
-              <button type="submit" class="btn btn-primary">I iz want becum membrar</button>
+              <button type="submit" class="btn btn-primary">Send my invoice</button>
             </div>
           </form>
         </div>
