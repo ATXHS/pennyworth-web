@@ -44,11 +44,14 @@ def create_invoice(form):
     client_id = response.client_id
 
     # Add selected invoice type for client
-    month = datetime.now().strftime('%B')
     lines = [
         api.types.line(
             name='ATXDUES', unit_cost='75', quantity='1',
-            description='$75 Dues for the month of {0}'.format(month)
+            description='$75 Dues for the month of ::month::'
+        ),
+        api.types.line(
+            name='AUTOPAY', unit_cost='-25', quantity='1',
+            description='$25 discount for Auto-Pay'
         )
     ]
     invoice=dict(
@@ -66,6 +69,9 @@ treasurer@atxhackerspace.org
 (512) 553-3917
 """)
     response = c.recurring.create(recurring=invoice)
+    recurring_id = response.recurring_id
+    response = c.invoice.list(recurring_id=recurring_id, status='unpaid')
+    return response.invoices.invoice[0].links.client_view
 
 
 def install_webhooks():
@@ -92,14 +98,29 @@ def verify_callback(data):
 def payment_callback(data):
     app.logger.debug(data)
     c = get_client()
-    recurring_id = data['object_id']
-    response = c.recurring.get(recurring_id=20)
+    payment_id = data['object_id']
+    response = c.payment.get(payment_id=payment_id)
+    invoice_id = response.payment.get('payment_id', None)
+    if not invoice_id:
+        return
 
-    if hasattr(response.recurring, 'autobill'):
-        response = c.recurring.lines.add(
-            recurring_id=recurring_id,
-            lines=[api.types.line(
-                name='AUTOPAY', unit_cost='-25', quantity='1',
-                description='$25 discount for Auto-Pay'
-            )]
-        )
+    response = c.invoice.get(invoice_id=invoice_id)
+
+    recurring_id = response.invoice.get('recurring_id', None)
+    if not recurring_id:
+        return
+
+    response = c.recurring.get(recurring_id=recurring_id)
+
+    if not hasattr(response.recurring, 'autobill'):
+        discount_id = None
+        for line in response.recurring.lines.line:
+            if line.name == 'AUTOPAY':
+                discount_id = line.line_id
+                break
+
+        if discount_id:
+            response = c.recurring.lines.delete(
+                recurring_id=recurring_id,
+                line_id=discount_id
+            )

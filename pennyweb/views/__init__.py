@@ -26,19 +26,21 @@ def index():
     form = InvoiceForm()
     if form.validate_on_submit():
         try:
-            create_invoice(form)
+            invoice_url = create_invoice(form)
             flash('Success!')
-            return redirect(url_for('success'))
+            return redirect(url_for('success', invoice=invoice_url))
         except ClientAlreadyExists:
             flash('The specified email address already exists in our system. '
                   'Contact treasurer@atxhackerspace.org.')
             return render_template('index.html', form=form)
+
     return render_template('index.html', form=form)
 
 
 @app.route('/success')
 def success():
-    return render_template('success.html')
+    invoice_url = request.args.get('invoice')
+    return render_template('success.html', invoice_url=invoice_url)
 
 
 @app.route('/freshbooks_webhook', methods=('POST',))
