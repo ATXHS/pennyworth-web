@@ -1,16 +1,14 @@
 #    -*- mode: org -*-
 
-* TODO Only charge $75 to begin with, then auto-discount upon auto-pay payment
-  There's no way to force auto-pay on a person, so we'll have to wait
-  until they have made their first payment to give them their
-  discount. It can be applied in a webhook upon payment as well as via
-  a redirect back to this app that checks the invoice and applies the
-  discount if it's not already done (maybe one or the other only,
-  since we don't want to double-discount).
+* Fix web hook the update method is not being called correctly
 
-** TODO Write authorize.net auto-refunder
-   Because we can't add discounts via FreshBooks, we'll have to do it
-   via Authorize.net instead. We should be able to take the the ref
-   number in the invoice/payment and fetch the payment from Auth.net,
-   then give a partial discount? At that point, we can edit the FB
-   payment, then the FB invoice.
+* Add support for running behind a proxy
+  see http://flask.pocoo.org/docs/deploying/others/ for proxy setup
+
+* Document code at least a little
+
+* Make Debugging freshbooks requests dependent on debug mode
+
+* Add-on items
+** B-Shares
+** "Family" memberships
