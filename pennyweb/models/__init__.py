@@ -22,7 +22,7 @@ class ClientAlreadyExists(Exception):
 
 
 def create_invoice(form):
-    c = get_client(debug=True)
+    c = get_client()
 
     # Check if user exists in freshbooks
     response = c.client.list(folder='active', email=form.email.data)
