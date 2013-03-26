@@ -26,6 +26,7 @@ def create_invoice(form):
 
     # Check if user exists in freshbooks
     response = c.client.list(folder='active', email=form.email.data)
+
     # If so, don't allow an invoice to be made
     if int(response.clients.attrib['total']) > 0:
         app.logger.debug(
@@ -73,21 +74,25 @@ Martin Bogomolni
 treasurer@atxhackerspace.org
 (512) 553-3917
 """)
+
+    # Set recurring profile to send email and start on first of month
     response = c.recurring.create(recurring=invoice)
     recurring_id = response.recurring_id
     update_response = c.recurring.update(recurring=dict(recurring_id=recurring_id, send_email='1', date=(date.today() + relativedelta(months=1)).strftime('%Y-%m-01')))
+
+    # Grab first invoice in set...
     response = c.invoice.list(recurring_id=recurring_id, status='draft')
-
     invoice = response.invoices.invoice[0]
-    prorate = month_left()
 
+    # ... And prorate the dues and autopay items, update record.
+    prorate = month_left()
     prorated_lines = [api.types.line(name=l.name, unit_cost=l.unit_cost,
                                      quantity=prorate if l.name in ('ATXDUES', 'AUTOPAY') else l.quantity,
                                      description=l.description)
                       for l in invoice.lines.line]
-
     response = c.invoice.update(invoice=dict(invoice_id=invoice.invoice_id, lines=prorated_lines, notes='Amount prorated for remainder of month.'))
 
+    # Nofity the invoicee now that its prorated.
     c.invoice.sendByEmail(invoice_id=invoice.invoice_id)
     return invoice.links.client_view
 
