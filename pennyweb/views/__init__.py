@@ -7,13 +7,14 @@ from flask.ext.wtf import Email, Form, Required, TextField
 
 
 class InvoiceForm(Form):
+    # The Basics
     first_name = TextField('first name *', [Required()])
     last_name = TextField('last name *', [Required()])
     email = TextField('email *', [Required(), Email()])
     home_phone = TextField('home phone')
     mobile = TextField('mobile phone')
 
-    # primary address
+    # Primary Address
     p_street1 = TextField('address 1 *', [Required()])
     p_street2 = TextField('address 2')
     p_city = TextField('city *', [Required()])
@@ -21,7 +22,7 @@ class InvoiceForm(Form):
     p_code = TextField('zip *', [Required()])
 
 
-@app.route('/', methods=('GET', 'POST'))
+@app.route('/', methods=('GET', 'POST')) # Receive form data and validate
 def index():
     form = InvoiceForm()
     if form.validate_on_submit():
@@ -37,13 +38,13 @@ def index():
     return render_template('index.html', form=form)
 
 
-@app.route('/success')
+@app.route('/success') # Woo, invoice created!
 def success():
     invoice_url = request.args.get('invoice')
     return render_template('success.html', invoice_url=invoice_url)
 
 
-@app.route('/freshbooks_webhook', methods=('POST',))
+@app.route('/freshbooks_webhook', methods=('POST',)) # Freshbooks callback
 def freshbooks_webhook():
     name = request.form.get('name')
     if name == 'callback.verify':
