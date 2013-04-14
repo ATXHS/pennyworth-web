@@ -7,6 +7,9 @@
           <h1>Join ATX Hackerspace!</h1>
           <form method="POST" action="." class="form-horizontal">
             {{ form.csrf_token }}
+            <div class="controls controls-row>
+              {{ form.first_name.label(class="span4") }}{{ form.first_name(class="span4") }}
+            </div>
             {% for field in form %}
               {% if field != form.csrf_token %}
                 {% with errors = form.errors.get(field.name, []) %}

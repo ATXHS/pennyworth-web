@@ -7,6 +7,7 @@
           <h1>Invoice request sent</h1>
           You should be receiving your invoice via email shortly.<br\>
           You can pay now by visiting the invoice page:
-          <a href="{{ invoice_url }}">{{ invoice_url }}</a>
+          <a class="btn btn-primary" href="{{ invoice_url }}">Pay invoice now</a>
+          <a class="btn btn-info" href="{{ url_for('index') }}">Back to the signup page</a>
         </div>
 {% endblock %}
