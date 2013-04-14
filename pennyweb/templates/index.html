@@ -16,7 +16,7 @@
 		<div class="control-label" for="{{ fields[0].name }}">{{ label }}</div>
 		<div class="controls">
 		  {% for field in fields %}
-		    {{ field(class='span6', placeholder=field.label.text) }}
+		    {{ field(class='span5', placeholder=field.label.text) }}
 		    {% with errors = form.errors.get(field.name) or [] %}
                       {% for error in errors %}
                         <span class="help-inline">{{ error }}</span>
