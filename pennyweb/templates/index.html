@@ -10,13 +10,13 @@
 	    {% for label, fields in
 	        ('Name', (form.first_name, form.last_name)),
 	        ('Email/Phone', (form.email, form.home_phone, form.mobile)),
-	        ('Address', (form.p_street1, form.p_street2)),
-	        (None, (form.p_city, form.p_state, form.p_code)) %}
+	        ('Address', (form.p_street1, form.p_street2, form.p_city, 
+	                     form.p_state, form.p_code)) %}
               <div class="control-group">
 		<div class="control-label" for="{{ fields[0].name }}">{{ label }}</div>
 		<div class="controls">
 		  {% for field in fields %}
-		    {{ field(placeholder=field.label.text) }}
+		    {{ field(class='span6', placeholder=field.label.text) }}
 		    {% with errors = form.errors.get(field.name) or [] %}
                       {% for error in errors %}
                         <span class="help-inline">{{ error }}</span>
