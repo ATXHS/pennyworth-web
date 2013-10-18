@@ -12,6 +12,8 @@ Setup
 3. cd /path/to/pennyworth-web
 3. pip install -r requirements.txt
 4. python setup.py develop
+5. mkdir instance
+6. cp pennyweb/default_settings.py instance/pennyweb.cfg
 
 Running
 -------
