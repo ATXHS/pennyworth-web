@@ -2,6 +2,7 @@ Flask
 Flask-DebugToolbar
 Flask-Script
 Flask-Security
+Flask-SQLAlchemy
 Flask-WTF
 dateutils
 refreshbooks
