@@ -1,7 +1,7 @@
 from flask_script import Manager
 
-from pennyweb import app
-#from pennyweb.models import install_webhooks
+from . import app
+# from pennyweb.models import install_webhooks
 from .models import db
 from .models.users import user_datastore
 

@@ -1,6 +1,7 @@
+# pylint: disable=no-member
 from . import app, db
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, \
-    RoleMixin, login_required
+    RoleMixin
 
 roles_users = db.Table(
     'roles_users',
@@ -48,6 +49,7 @@ class User(db.Model, UserMixin):
     city = db.Column(db.String(50))
     state = db.Column(db.String(2))
     zip_code = db.Column(db.String(7))
+
 
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
