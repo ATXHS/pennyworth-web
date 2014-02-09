@@ -1,7 +1,10 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html class="no-js" lang="en">
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}{% endblock %}</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" />
     {% assets "css" %}
       <link rel="stylesheet" href="{{ ASSET_URL }}" />
     {% endassets %}
@@ -10,14 +13,41 @@
     {% endassets %}
   </head>
   <body>
+    <nav class="top-bar" data-topbar>
+      <ul class="title-area">
+        <li class="name">
+          <h1><a href="/">{{ config.APP_NAME }}</a></h1>
+        </li>
+        <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
+      </ul>
+      <section class="top-bar-section">
+        <ul class="right">
+          {% if current_user.is_authenticated() %}
+            <li><a href="{{ url_for_security('logout') }}">Logout</a></li>
+          {% else %}
+            <li><a href="{{ url_for_security('login') }}">Login</a></li>
+            {% if security.registerable %}
+              <li><a href="{{ url_for_security('register') }}">Register</a></li>
+            {% endif %}
+            {% if security.recoverable %}
+              <li><a href="{{ url_for_security('forgot_password') }}">Forgot password</a></li>
+            {% endif %}
+            {% if security.confirmable %}
+              <li><a href="{{ url_for_security('send_confirmation') }}">Confirm account</a></li>
+            {% endif %}
+          {% endif %}
+        </ul>
+      </section>
+    </nav>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}
-        <div data-alert class="alert-box {{ category }} round">
+        <div data-alert class="alert-box {{ category }}">
           {{ message }}
         </div>
       {% endfor %}
     {% endwith %}
-    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="content" class="row">{% block content %}{% endblock %}</div>
     
     {% assets "js_bottom" %}
       <script src="{{ ASSET_URL }}"></script>

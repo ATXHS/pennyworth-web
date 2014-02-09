@@ -1,5 +1,7 @@
-.pyflymakercc
 *.pyc
-pennyweb.egg-info
-instance
 *~
+.pyflymakerc*
+instance
+pennyweb.egg-info
+pennyweb/static/.webassets-cache
+pennyweb/static/public
