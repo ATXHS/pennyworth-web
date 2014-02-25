@@ -157,3 +157,21 @@ def payment_callback(data):
                 recurring_id=recurring_id,
                 line_id=discount_id
             )
+
+
+def get_monthly_recurring():
+    c = get_client()
+    page = 0
+    last_page = 1
+    invoice_count = 0
+    total_charges = 0.0
+    while page < last_page:
+        page += 1
+        res = c.recurring.list(page=page)
+        last_page = int(res.recurrings.attrib['pages'])
+        for recurring in res.recurrings.recurring:
+            if recurring.frequency == 'monthly':
+                invoice_count += 1
+                total_charges += float(recurring.amount.pyval)
+
+    return invoice_count, total_charges
