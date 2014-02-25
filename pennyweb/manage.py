@@ -23,24 +23,26 @@ def pull_freshbooks():
     "Synchronize users from freshbooks into local DB"
     for client in get_all_clients():
         print client.first_name, client.last_name, client.email
+        if user_datastore.get_user(client.email.text):
+            continue
         user_datastore.create_user(
-            freshbooks_id=client.client_id,
-            first_name=client.first_name,
-            last_name=client.last_name,
-            nickname=client.username,
-            email=client.email,
+            freshbooks_id=client.client_id.pyval,
+            first_name=client.first_name.text,
+            last_name=client.last_name.text,
+            nickname=client.username.text,
+            email=client.email.text,
             active=True,
 
-            home_phone=client.home_phone,
-            cell_phone=client.mobile,
+            home_phone=client.home_phone.text,
+            cell_phone=client.mobile.text,
 
-            address=client.p_street1,
-            address2=client.p_street2,
-            city=client.p_city,
+            address=client.p_street1.text,
+            address2=client.p_street2.text,
+            city=client.p_city.text,
             state=_state(client.p_state.text),
-            zip_code=client.p_code
+            zip_code=client.p_code.text
         )
-    db.session.commit()
+        db.session.commit()
 
 
 def _state(given):

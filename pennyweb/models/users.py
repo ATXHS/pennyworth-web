@@ -42,7 +42,8 @@ class User(db.Model, UserMixin):
     emergency_contact_name = db.Column(db.String(255))
     birthday = db.Column(db.Date())
 
-    created_at = db.Column(db.DateTime(), server_default=db.func.now())
+    created_at = db.Column(db.DateTime(), default=db.func.now(),
+                           server_default=db.func.now())
 
     address = db.Column(db.String(50))
     address2 = db.Column(db.String(50))
