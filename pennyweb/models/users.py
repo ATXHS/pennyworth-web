@@ -50,6 +50,8 @@ class User(db.Model, UserMixin):
     state = db.Column(db.String(2))
     zip_code = db.Column(db.String(7))
 
+    freshbooks_id = db.Column(db.Integer(), nullable=True)
+
 
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)

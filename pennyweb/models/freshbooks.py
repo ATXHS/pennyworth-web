@@ -175,3 +175,16 @@ def get_monthly_recurring():
                 total_charges += float(recurring.amount.pyval)
 
     return invoice_count, total_charges
+
+
+def get_all_clients(folder='active'):
+    c = get_client()
+    page = 0
+    last_page = 1
+    while page < last_page:
+        page += 1
+        res = c.client.list(folder=folder, page=page)
+        last_page = int(res.clients.attrib['pages'])
+
+        for client in res.clients.client:
+            yield client
