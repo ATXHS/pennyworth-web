@@ -5,3 +5,4 @@ instance
 pennyweb.egg-info
 pennyweb/static/.webassets-cache
 pennyweb/static/public
+dev.db
