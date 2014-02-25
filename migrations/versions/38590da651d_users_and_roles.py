@@ -46,7 +46,7 @@ def upgrade():
                               sa.String(length=255), nullable=True),
                     sa.Column('birthday', sa.Date(), nullable=True),
                     sa.Column('created_at', sa.DateTime(),
-                              server_default='now()', nullable=True),
+                              server_default='CURRENT_TIMESTAMP', nullable=True),
                     sa.Column('address', sa.String(length=50), nullable=True),
                     sa.Column('address2', sa.String(length=50), nullable=True),
                     sa.Column('city', sa.String(length=50), nullable=True),
