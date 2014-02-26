@@ -1,8 +1,10 @@
 from flask import Flask
+from flask_dashed.admin import Admin
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('pennyweb.default_settings')
 app.config.from_pyfile('pennyweb.cfg')
+admin = Admin(app)
 
 # IMPORTANT: These imports *must* be after the above initialization of
 # the app variable because they circularly-import this package (which

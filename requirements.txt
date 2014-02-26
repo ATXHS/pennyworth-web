@@ -1,5 +1,6 @@
 Flask==0.10.1
 Flask-Assets==0.8
+Flask-Dashed==0.1b2
 Flask-DebugToolbar==0.9.0
 Flask-Mail==0.9.0
 Flask-SQLAlchemy==1.0
@@ -11,3 +12,4 @@ dateutils==0.6.6
 jsmin==2.0.9
 refreshbooks==2.0
 requests==2.2.1
+WTForms==1.0.5
