@@ -5,3 +5,4 @@ Flask-DebugToolbar
 Flask-Script
 Flask-WTF
 dateutils
+gunicorn
