@@ -3,7 +3,7 @@ from pennyweb.models import create_invoice, ClientAlreadyExists,\
     verify_callback, payment_callback
 
 from flask import flash, redirect, request, render_template, url_for
-from flask_wtf import Form
+from flask_wtf import Form, RecaptchaField
 from wtforms import TextField
 from wtforms.validators import DataRequired, Email
 
@@ -22,6 +22,8 @@ class InvoiceForm(Form):
     p_city = TextField('city *', [DataRequired()])
     p_state = TextField('state *', [DataRequired()])
     p_code = TextField('zip *', [DataRequired()])
+
+    recaptcha = RecaptchaField()
 
 
 @app.route('/', methods=('GET', 'POST'))  # Receive form data and validate

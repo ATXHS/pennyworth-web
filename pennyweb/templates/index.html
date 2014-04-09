@@ -11,7 +11,8 @@
 	        ('Name', (form.first_name, form.last_name)),
 	        ('Email/Phone', (form.email, form.home_phone, form.mobile)),
 	        ('Address', (form.p_street1, form.p_street2, form.p_city, 
-	                     form.p_state, form.p_code)) %}
+	                     form.p_state, form.p_code)),
+            ('Captcha', (form.recaptcha, )) %}
               <div class="control-group">
 		<div class="control-label" for="{{ fields[0].name }}">{{ label }}</div>
 		<div class="controls">
