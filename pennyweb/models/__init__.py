@@ -58,6 +58,10 @@ def create_invoice(form):
         api.types.line(
             name='AUTOPAY', unit_cost='-25', quantity='1',
             description='$25 discount for Auto-Pay'
+        ),
+        api.types.line(
+            name='TENDOLLAR', unit_cost='10', quantity='1',
+            description='$10 Increase in Dues for Jan-Jun'
         )
     ]
     invoice=dict(
@@ -87,7 +91,7 @@ treasurer@atxhackerspace.org
     # ... And prorate the dues and autopay items, update record.
     prorate = month_left()
     prorated_lines = [api.types.line(name=l.name, unit_cost=l.unit_cost,
-                                     quantity=prorate if l.name in ('ATXDUES', 'AUTOPAY') else l.quantity,
+                                     quantity=prorate if l.name in ('ATXDUES', 'AUTOPAY', 'TENDOLLAR') else l.quantity,
                                      description=l.description)
                       for l in invoice.lines.line]
     response = c.invoice.update(invoice=dict(invoice_id=invoice.invoice_id, lines=prorated_lines, notes='Amount prorated for remainder of month.'))
