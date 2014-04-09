@@ -4,7 +4,7 @@ from flask_migrate import Migrate, MigrateCommand
 from . import app
 # from pennyweb.models import install_webhooks
 from .models import db
-from .models.freshbooks import get_all_clients
+from .models.freshbooks import get_all_clients, get_client
 from .models.users import user_datastore
 from .util import state_map
 
@@ -43,6 +43,37 @@ def pull_freshbooks():
             zip_code=client.p_code.text
         )
         db.session.commit()
+
+
+@manager.command
+def count_freshbooks():
+    "Count number of recurring freshbooks profiles"
+    line_types = set()
+    count = 0
+    for recurring in get_all_recurring(get_client()):
+        for line in recurring.lines.line:
+            if line.name in ('ATXDUES', 'FAMILY30', 'CORP50'):
+                count += 1
+            if str(line.name).startswith('1YEAR'):
+                count += 1
+            if str(line.name).startswith('1-YEAR'):
+                count += 1
+            line_types.add(line.name)
+            # print line.name, line.description, line.unit_cost
+    print count
+    print line_types
+
+
+def get_all_recurring(c, folder='active'):
+    page = 0
+    last_page = 1
+    while page < last_page:
+        page += 1
+        res = c.recurring.list(folder=folder, page=page)
+        last_page = int(res.recurrings.attrib['pages'])
+
+        for recurring in res.recurrings.recurring:
+            yield recurring
 
 
 def _state(given):

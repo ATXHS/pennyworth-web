@@ -167,7 +167,7 @@ def get_monthly_recurring():
     total_charges = 0.0
     while page < last_page:
         page += 1
-        res = c.recurring.list(page=page)
+        res = c.recurring.list(page=page, folder='active')
         last_page = int(res.recurrings.attrib['pages'])
         for recurring in res.recurrings.recurring:
             if recurring.frequency == 'monthly':
