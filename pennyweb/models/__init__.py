@@ -1,11 +1,67 @@
 import calendar
 from datetime import date
 from dateutil.relativedelta import relativedelta
+from os import environ
+from string import lower
 
+import ldap3
 from refreshbooks import api
 from flask import url_for
 from pennyweb import app
 
+ATXHS_AD_USER = environ.get('ATXHS_AD_USER')
+ATXHS_AD_PASSWD = environ.get('ATXHS_AD_PASSWD')
+ATXHS_SERVER_LIST = environ.get('ATXHS_AD_SERVER_LIST').split(",")
+ATXHS_AD_USE_TLS = environ.get('ATXHS_AD_USE_TLS') == True
+AD_USER_SEARCH_DN = 'ou=Batpass Users,dc=atxhs,dc=hack'
+AD_GROUP_SEARCH_DN = 'ou=Batpass Groups,dc=atxhs,dc=hack'
+
+
+# need a better name for this shit
+class ActiveDirectoryClient(object):
+    def __init__(self):
+        self.server_pool = ldap3.ServerPool(ATXHS_SERVER_LIST,
+                                            ldap3.POOLING_STRATEGY_ROUND_ROBIN,
+                                            active=True)
+        self.connection = ldap3.Connection(self.server_pool,
+                                           user = ATXHS_AD_USER,
+                                           password = ATXHS_AD_PASSWD,
+                                           auto_bind = ldap3.AUTO_BIND_NO_TLS)
+        self.connection.raise_exceptions = True
+        self.connection.open()
+
+    def create_aduser(self, user_hash):
+        email = lower(user_hash['email'])
+        username = lower(user_hash['username'])
+
+        if self.email_taken(email) or self.username_taken(username):
+            raise ADUserAlreadyExists
+        else:
+            # more things go here
+            dn = 'cn=' + user_hash['username']
+            dn = ','.join([dn, AD_USER_SEARCH_DN])
+            self.connection.add(dn,
+                                [u'top', u'person', u'organizationalPerson', u'user'],
+                                {'mail': email,
+                                 'sAMAccountName': username,
+                                 'distinguishedName': dn})
+
+
+    def username_taken(self, username):
+        return self.connection.search(search_base=AD_USER_SEARCH_DN,
+                               search_filter=''.join(['(sAMAccountName=', username, ')']),
+                               search_scope=ldap3.SUBTREE)
+
+    def email_taken(self, email):
+        return self.connection.search(search_base=AD_USER_SEARCH_DN,
+                               search_filter=''.join(['(mail=', email, ')']),
+                               search_scope=ldap3.SUBTREE)
+
+class ClientAlreadyExists(Exception):
+    pass
+
+class ADUserAlreadyExists(Exception):
+    pass
 
 def get_client(debug=False):
     return api.TokenClient(
@@ -15,10 +71,6 @@ def get_client(debug=False):
         request_encoder=api.logging_request_encoder if debug else api.default_request_encoder,
         response_decoder=api.logging_response_decoder if debug else api.default_response_decoder
     )
-
-
-class ClientAlreadyExists(Exception):
-    pass
 
 
 def create_invoice(form):
