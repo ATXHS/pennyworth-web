@@ -9,12 +9,12 @@ from refreshbooks import api
 from flask import url_for
 from pennyweb import app
 
-ATXHS_AD_USER = environ.get('ATXHS_AD_USER')
-ATXHS_AD_PASSWD = environ.get('ATXHS_AD_PASSWD')
-ATXHS_SERVER_LIST = environ.get('ATXHS_AD_SERVER_LIST').split(",")
-ATXHS_AD_USE_TLS = environ.get('ATXHS_AD_USE_TLS') == True
-AD_USER_SEARCH_DN = 'ou=Batpass Users,dc=atxhs,dc=hack'
-AD_GROUP_SEARCH_DN = 'ou=Batpass Groups,dc=atxhs,dc=hack'
+ATXHS_AD_USER = app.config['AD_USER']
+ATXHS_AD_PASSWD = app.config['AD_PASSWD']
+ATXHS_SERVER_LIST = app.config['AD_SERVER_LIST']
+ATXHS_AD_USE_TLS = app.config['AD_USE_TLS']
+AD_USER_BASE_DN = app.config['AD_USER_BASE_DN']
+AD_GROUP_BASE_DN = app.config['AD_GROUP_BASE_DN']
 
 
 # need a better name for this shit
@@ -30,37 +30,57 @@ class ActiveDirectoryClient(object):
         self.connection.raise_exceptions = True
         self.connection.open()
 
-    def create_aduser(self, user_hash):
+    def create_user(self, **user_hash):
         email = lower(user_hash['email'])
         username = lower(user_hash['username'])
 
         if self.email_taken(email) or self.username_taken(username):
-            raise ADUserAlreadyExists
+            raise ADUserAlreadyExists()
         else:
             # more things go here
-            dn = 'cn=' + user_hash['username']
-            dn = ','.join([dn, AD_USER_SEARCH_DN])
-            self.connection.add(dn,
-                                [u'top', u'person', u'organizationalPerson', u'user'],
-                                {'mail': email,
-                                 'sAMAccountName': username,
-                                 'distinguishedName': dn})
+            cn = '{} {}'.format(user_hash['first_name'], user_hash['last_name'])
+            dn = 'cn={},{}'.format(cn, AD_USER_BASE_DN)
+            ok = self.connection.add(
+                dn,
+                [u'top', u'person', u'organizationalPerson', u'user'],
+                 {'mail': email,
+                 'sAMAccountName': username,
+                 'distinguishedName': dn,
+                 'givenName': first_name,
+                 'sn': last_name,
+                 'cn': cn})
+            if not ok:
+                raise ADAddFailed()
+            ok = self.connection.search(
+                search_base=AD_USER_BASE_DN,
+                search_filter='(sAMAcountName={})'.format(username),
+                search_scope=ldap3.SUBTREE,
+                attributes=['guid'],
+            )
+            if not ok:
+                rase ADAddFailed()
+            return self.connection.response[0]['attributes']['guid']
 
 
     def username_taken(self, username):
-        return self.connection.search(search_base=AD_USER_SEARCH_DN,
-                               search_filter=''.join(['(sAMAccountName=', username, ')']),
-                               search_scope=ldap3.SUBTREE)
+        return self.connection.search(
+            search_base=AD_USER_BASE_DN,
+            search_filter='(sAMAcountName={})'.format(username),
+            search_scope=ldap3.SUBTREE)
 
     def email_taken(self, email):
-        return self.connection.search(search_base=AD_USER_SEARCH_DN,
-                               search_filter=''.join(['(mail=', email, ')']),
-                               search_scope=ldap3.SUBTREE)
+        return self.connection.search(
+            search_base=AD_USER_BASE_DN,
+            search_filter='(mail={})'.format(email),
+            search_scope=ldap3.SUBTREE)
 
 class ClientAlreadyExists(Exception):
     pass
 
 class ADUserAlreadyExists(Exception):
+    pass
+
+class ADAddFailed(Exception):
     pass
 
 def get_client(debug=False):
@@ -74,6 +94,7 @@ def get_client(debug=False):
 
 
 def create_invoice(form):
+    ad = ActiveDirectoryClient()
     c = get_client()
 
     # Check if user exists in freshbooks
@@ -85,6 +106,11 @@ def create_invoice(form):
             'Client already exists with email {0} (checked for {1})'.format(
                 response.clients.client[0].email, form.email.data))
         raise ClientAlreadyExists()
+
+    # Try to create user in active directory
+    ad.create_user(
+        username=form.username.data, email=form.email.data,
+        first_name=form.first_name.data, last_name=form.last_name.data)
 
     # If not, add client
     client = dict(
@@ -153,7 +179,7 @@ def month_left():
     days_in_month = calendar.monthrange(today.year, today.month)[1]
     left = (float(days_in_month) - (today.day - 1)) / days_in_month
     return '%.02f' % left
-    
+
 
 def install_webhooks():
     print 'installing hooks...'

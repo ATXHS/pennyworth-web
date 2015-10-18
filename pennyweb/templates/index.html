@@ -3,51 +3,52 @@
 {% block title %}Join ATX Hackerspace!{% endblock %}
 
 {% block content %}
-        <div class="span12">
-          <h1 class="span8 offset3">Join ATX Hackerspace!</h1>
-          <form method="POST" action="." class="form-horizontal">
-            {{ form.csrf_token }}
-	    {% for label, fields in
-	        ('Name', (form.first_name, form.last_name)),
-	        ('Email/Phone', (form.email, form.home_phone, form.mobile)),
-	        ('Address', (form.p_street1, form.p_street2, form.p_city, 
-	                     form.p_state, form.p_code)),
-            ('Captcha', (form.recaptcha, )) %}
-              <div class="control-group">
-		<div class="control-label" for="{{ fields[0].name }}">{{ label }}</div>
-		<div class="controls">
-		  {% for field in fields %}
-		    {{ field(class='span5', placeholder=field.label.text) }}
-		    {% with errors = form.errors.get(field.name) or [] %}
-                      {% for error in errors %}
-                        <span class="help-inline">{{ error }}</span>
-                      {% endfor %}
-		    {% endwith %}
-                  {% endfor %}
-		</div>
-              </div>
-	    {% endfor %}
-            <div class="span10 offset1">
-              You will be sent an monthly recurring invoice for $85
-              with a $25 discount for signing up for auto-pay. <b>If
-              you would like to continue to receive discount of $25 a
-              month, select the auto-pay option when you are making
-              your first payment!</b> If you do not select the
-              auto-pay option, your second invoice will be for $85 and
-              you will need to contact treasurer@atxhackerspace.org to
-              have the auto-pay discount added back to your account.
-            </div>
-            <div class="span10 offset1"><br \><b>To reiterate, select the option
-            labeled <em style="text-decoration: underline">"Charge the full amount ($60.00) to my credit
-            card monthly."</em> to continue being charged only $60,
-            otherwise your next invoice will be for $85
-            instead. </b></div>
-            <div class="span10 offset1" style="font-size:larger; font-weight: bold"><br />
-              The default option is to pay manually and is NOT the one
-              you want.</div>
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Send my invoice</button>
-            </div>
-          </form>
+  <div class="span12">
+    <h1 class="span8 offset3">Join ATX Hackerspace!</h1>
+    <form method="POST" action="." class="form-horizontal">
+      {{ form.csrf_token }}
+      {% for label, fields in
+        ('Login', (form.username, )),
+        ('Name', (form.first_name, form.last_name)),
+        ('Email/Phone', (form.email, form.home_phone, form.mobile)),
+        ('Address', (form.p_street1, form.p_street2, form.p_city,
+                     form.p_state, form.p_code)),
+        ('Captcha', (form.recaptcha, )) %}
+        <div class="control-group">
+          <div class="control-label" for="{{ fields[0].name }}">{{ label }}</div>
+          <div class="controls">
+            {% for field in fields %}
+              {{ field(class='span5', placeholder=field.label.text) }}
+              {% with errors = form.errors.get(field.name) or [] %}
+                {% for error in errors %}
+                  <span class="help-inline">{{ error }}</span>
+                {% endfor %}
+              {% endwith %}
+            {% endfor %}
+          </div>
         </div>
+      {% endfor %}
+      <div class="span10 offset1">
+        You will be sent an monthly recurring invoice for $85
+        with a $25 discount for signing up for auto-pay. <b>If
+        you would like to continue to receive discount of $25 a
+        month, select the auto-pay option when you are making
+        your first payment!</b> If you do not select the
+        auto-pay option, your second invoice will be for $85 and
+        you will need to contact treasurer@atxhackerspace.org to
+        have the auto-pay discount added back to your account.
+      </div>
+      <div class="span10 offset1"><br \><b>To reiterate, select the option
+        labeled <em style="text-decoration: underline">"Charge the full amount ($60.00) to my credit
+        card monthly."</em> to continue being charged only $60,
+        otherwise your next invoice will be for $85
+        instead. </b></div>
+      <div class="span10 offset1" style="font-size:larger; font-weight: bold"><br />
+        The default option is to pay manually and is NOT the one
+        you want.</div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Send my invoice</button>
+      </div>
+    </form>
+  </div>
 {% endblock %}

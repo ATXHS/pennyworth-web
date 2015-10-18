@@ -10,6 +10,7 @@ from wtforms.validators import DataRequired, Email
 
 class InvoiceForm(Form):
     # The Basics
+    username = TextField('username *', [DataRequired()])
     first_name = TextField('first name *', [DataRequired()])
     last_name = TextField('last name *', [DataRequired()])
     email = TextField('email *', [DataRequired(), Email()])
@@ -37,6 +38,14 @@ def index():
         except ClientAlreadyExists:
             flash('The specified email address already exists in our system. '
                   'Contact treasurer@atxhackerspace.org.')
+            return render_template('index.html', form=form)
+        except ADUserAlreadyExists:
+            flash('The specified username already exists in our system. '
+                  'Please choose a different username.')
+            return render_template('index.html', form=form)
+        except ADAddFailed:
+            flash('There was an unexpected error adding your user account. '
+                  'Please contact treasurer@atxhackerspace.org.')
             return render_template('index.html', form=form)
 
     return render_template('index.html', form=form)
