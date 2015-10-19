@@ -5,6 +5,7 @@ from os import environ
 from string import lower
 
 import ldap3
+import uuid
 from refreshbooks import api
 from flask import url_for
 from pennyweb import app
@@ -16,12 +17,34 @@ ATXHS_AD_USE_TLS = app.config['AD_USE_TLS']
 AD_USER_BASE_DN = app.config['AD_USER_BASE_DN']
 AD_GROUP_BASE_DN = app.config['AD_GROUP_BASE_DN']
 
+class ClientAlreadyExists(Exception):
+    pass
+
+class ADUserAlreadyExists(Exception):
+    pass
+
+class ADEmailAlreadyExists(Exception):
+    pass
+
+class ADAddFailed(Exception):
+    pass
+
+import logging
+from ldap3.utils.log import set_library_log_activation_level, set_library_log_detail_level, ERROR, DEBUG, EXTENDED
+
+if app.config['DEBUG']:
+    logging.basicConfig(level=logging.DEBUG)
+    set_library_log_detail_level(EXTENDED)
+    set_library_log_activation_level(logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
+    set_library_log_detail_level(ERROR)
 
 # need a better name for this shit
 class ActiveDirectoryClient(object):
     def __init__(self):
         self.server_pool = ldap3.ServerPool(ATXHS_SERVER_LIST,
-                                            ldap3.POOLING_STRATEGY_ROUND_ROBIN,
+                                            ldap3.POOLING_STRATEGY_FIRST,
                                             active=True)
         self.connection = ldap3.Connection(self.server_pool,
                                            user = ATXHS_AD_USER,
@@ -29,16 +52,16 @@ class ActiveDirectoryClient(object):
                                            auto_bind = ldap3.AUTO_BIND_NO_TLS)
         self.connection.raise_exceptions = True
         self.connection.open()
+        self.connection.bind()
 
-    def create_user(self, **user_hash):
-        email = lower(user_hash['email'])
-        username = lower(user_hash['username'])
-
-        if self.email_taken(email) or self.username_taken(username):
+    def create_user(self, username, email, first_name, last_name):
+        if self.email_taken(email):
+            raise ADEmailAlreadyExists()
+        elif self.username_taken(username):
             raise ADUserAlreadyExists()
         else:
             # more things go here
-            cn = '{} {}'.format(user_hash['first_name'], user_hash['last_name'])
+            cn = username
             dn = 'cn={},{}'.format(cn, AD_USER_BASE_DN)
             ok = self.connection.add(
                 dn,
@@ -48,24 +71,28 @@ class ActiveDirectoryClient(object):
                  'distinguishedName': dn,
                  'givenName': first_name,
                  'sn': last_name,
+                 'displayName': '{} {}'.format(first_name, last_name),
                  'cn': cn})
             if not ok:
                 raise ADAddFailed()
+            app.logger.debug(self.connection.response)
             ok = self.connection.search(
                 search_base=AD_USER_BASE_DN,
-                search_filter='(sAMAcountName={})'.format(username),
+                search_filter='(sAMAccountName={})'.format(username),
                 search_scope=ldap3.SUBTREE,
-                attributes=['guid'],
+                attributes=["objectGUID"],
             )
             if not ok:
-                rase ADAddFailed()
-            return self.connection.response[0]['attributes']['guid']
+                app.logger.error('Got non-SUCCESS response: {}, last_error: {}'.format(ok, self.connection.last_error))
+                app.logger.error('Last response: {}'.format(self.connection.response))
+                raise ADAddFailed()
+            return '{{{}}}'.format(uuid.UUID(bytes_le=self.connection.response[0]['attributes']['objectGUID'][0]))
 
 
     def username_taken(self, username):
         return self.connection.search(
             search_base=AD_USER_BASE_DN,
-            search_filter='(sAMAcountName={})'.format(username),
+            search_filter='(sAMAccountName={})'.format(username),
             search_scope=ldap3.SUBTREE)
 
     def email_taken(self, email):
@@ -73,15 +100,6 @@ class ActiveDirectoryClient(object):
             search_base=AD_USER_BASE_DN,
             search_filter='(mail={})'.format(email),
             search_scope=ldap3.SUBTREE)
-
-class ClientAlreadyExists(Exception):
-    pass
-
-class ADUserAlreadyExists(Exception):
-    pass
-
-class ADAddFailed(Exception):
-    pass
 
 def get_client(debug=False):
     return api.TokenClient(
@@ -108,7 +126,7 @@ def create_invoice(form):
         raise ClientAlreadyExists()
 
     # Try to create user in active directory
-    ad.create_user(
+    guid = ad.create_user(
         username=form.username.data, email=form.email.data,
         first_name=form.first_name.data, last_name=form.last_name.data)
 
@@ -131,7 +149,7 @@ def create_invoice(form):
     lines = [
         api.types.line(
             name='ATXDUES', unit_cost='85', quantity='1',
-            description='$85 Dues for the month of ::month::'
+            description='$85 Dues for the month of ::month::\nID: {}'.format(guid)
         ),
         api.types.line(
             name='AUTOPAY', unit_cost='-25', quantity='1',

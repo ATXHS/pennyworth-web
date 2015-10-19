@@ -1,16 +1,22 @@
 from pennyweb import app
-from pennyweb.models import create_invoice, ClientAlreadyExists,\
-    verify_callback, payment_callback
+from pennyweb.models import create_invoice, ADUserAlreadyExists,\
+    ADEmailAlreadyExists, ADAddFailed, ClientAlreadyExists, verify_callback,\
+    payment_callback
 
 from flask import flash, redirect, request, render_template, url_for
 from flask_wtf import Form, RecaptchaField
 from wtforms import TextField
-from wtforms.validators import DataRequired, Email
+from wtforms.validators import DataRequired, Email, Regexp, Length
 
 
 class InvoiceForm(Form):
     # The Basics
-    username = TextField('username *', [DataRequired()])
+    username = TextField(
+        'username *', [
+            DataRequired(),
+            Regexp(r'[a-zA-Z0-9][\w.]+', message='Username can only contain a-z, A-Z, 0-9, ".", and "_". Cannot start with "." or "_".'),
+            Length(min=3, max=20),
+        ])
     first_name = TextField('first name *', [DataRequired()])
     last_name = TextField('last name *', [DataRequired()])
     email = TextField('email *', [DataRequired(), Email()])
@@ -42,6 +48,10 @@ def index():
         except ADUserAlreadyExists:
             flash('The specified username already exists in our system. '
                   'Please choose a different username.')
+            return render_template('index.html', form=form)
+        except ADEmailAlreadyExists:
+            flash('The specified email already exists in our system. '
+                  'Contact treasurer@atxhackerspace.org.')
             return render_template('index.html', form=form)
         except ADAddFailed:
             flash('There was an unexpected error adding your user account. '
