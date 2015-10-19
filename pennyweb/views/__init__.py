@@ -14,7 +14,7 @@ class InvoiceForm(Form):
     username = TextField(
         'username *', [
             DataRequired(),
-            Regexp(r'[a-zA-Z0-9][\w.]+', message='Username can only contain a-z, A-Z, 0-9, ".", and "_". Cannot start with "." or "_".'),
+            Regexp(r'^[a-zA-Z0-9][\w.]+$', message='Username can only contain a-z, A-Z, 0-9, ".", and "_". Cannot start with "." or "_".'),
             Length(min=3, max=20),
         ])
     first_name = TextField('first name *', [DataRequired()])
@@ -53,7 +53,8 @@ def index():
             flash('The specified email already exists in our system. '
                   'Contact treasurer@atxhackerspace.org.')
             return render_template('index.html', form=form)
-        except ADAddFailed:
+        except Exception, e:
+            app.logger.error(e.message)
             flash('There was an unexpected error adding your user account. '
                   'Please contact treasurer@atxhackerspace.org.')
             return render_template('index.html', form=form)
