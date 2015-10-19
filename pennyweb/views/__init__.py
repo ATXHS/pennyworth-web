@@ -54,7 +54,7 @@ def index():
                   'Contact treasurer@atxhackerspace.org.')
             return render_template('index.html', form=form)
         except Exception, e:
-            app.logger.error(e.message)
+            app.logger.error(e)
             flash('There was an unexpected error adding your user account. '
                   'Please contact treasurer@atxhackerspace.org.')
             return render_template('index.html', form=form)

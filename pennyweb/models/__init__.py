@@ -9,10 +9,10 @@ from refreshbooks import api
 from flask import url_for
 from pennyweb import app
 
-ATXHS_AD_USER = app.config['AD_USER']
-ATXHS_AD_PASSWD = app.config['AD_PASSWD']
-ATXHS_SERVER_LIST = app.config['AD_SERVER_LIST']
-ATXHS_AD_USE_TLS = app.config['AD_USE_TLS']
+AD_USER = app.config['AD_USER']
+AD_PASSWD = app.config['AD_PASSWD']
+SERVER_LIST = app.config['AD_SERVER_LIST']
+AD_USE_TLS = app.config['AD_USE_TLS']
 AD_USER_BASE_DN = app.config['AD_USER_BASE_DN']
 AD_GROUP_BASE_DN = app.config['AD_GROUP_BASE_DN']
 
@@ -42,16 +42,16 @@ else:
 # need a better name for this shit
 class ActiveDirectoryClient(object):
     def __init__(self):
-        self.server_pool = ldap3.ServerPool(ATXHS_SERVER_LIST,
-                                            ldap3.POOLING_STRATEGY_FIRST,
-                                            active=True)
-        self.connection = ldap3.Connection(self.server_pool,
-                                           user = ATXHS_AD_USER,
-                                           password = ATXHS_AD_PASSWD,
-                                           auto_bind = ldap3.AUTO_BIND_NO_TLS)
+        self.server_pool = ldap3.ServerPool(
+            servers=[ldap3.Server(s, use_ssl=AD_USE_TLS) for s in SERVER_LIST],
+            pool_strategy=ldap3.POOLING_STRATEGY_FIRST,
+            active=True)
+        self.connection = ldap3.Connection(
+            self.server_pool,
+            user=AD_USER,
+            password=AD_PASSWD,
+            auto_bind=ldap3.AUTO_BIND_NO_TLS) # use_ssl=True above makes it use TLS, so we don't have to use the StartTLS command in the connection.
         self.connection.raise_exceptions = True
-        self.connection.open()
-        self.connection.bind()
 
     def create_user(self, username, email, first_name, last_name):
         if self.email_taken(email):
