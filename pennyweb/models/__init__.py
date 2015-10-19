@@ -1,7 +1,6 @@
 import calendar
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from os import environ
 from string import lower
 
 import ldap3
