@@ -3,3 +3,4 @@
 pennyweb.egg-info
 instance
 *~
+.DS_Store

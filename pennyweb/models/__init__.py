@@ -1,11 +1,104 @@
 import calendar
 from datetime import date
 from dateutil.relativedelta import relativedelta
+from string import lower
 
+import ldap3
+import uuid
 from refreshbooks import api
 from flask import url_for
 from pennyweb import app
 
+AD_USER = app.config['AD_USER']
+AD_PASSWD = app.config['AD_PASSWD']
+SERVER_LIST = app.config['AD_SERVER_LIST']
+AD_USE_TLS = app.config['AD_USE_TLS']
+AD_USER_BASE_DN = app.config['AD_USER_BASE_DN']
+AD_GROUP_BASE_DN = app.config['AD_GROUP_BASE_DN']
+
+class ClientAlreadyExists(Exception):
+    pass
+
+class ADUserAlreadyExists(Exception):
+    pass
+
+class ADEmailAlreadyExists(Exception):
+    pass
+
+class ADAddFailed(Exception):
+    pass
+
+import logging
+from ldap3.utils.log import set_library_log_activation_level, set_library_log_detail_level, ERROR, DEBUG, EXTENDED
+
+if app.config['DEBUG']:
+    logging.basicConfig(level=logging.DEBUG)
+    set_library_log_detail_level(EXTENDED)
+    set_library_log_activation_level(logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
+    set_library_log_detail_level(ERROR)
+
+# need a better name for this shit
+class ActiveDirectoryClient(object):
+    def __init__(self):
+        self.server_pool = ldap3.ServerPool(
+            servers=[ldap3.Server(s, use_ssl=AD_USE_TLS) for s in SERVER_LIST],
+            pool_strategy=ldap3.POOLING_STRATEGY_FIRST,
+            active=True)
+        self.connection = ldap3.Connection(
+            self.server_pool,
+            user=AD_USER,
+            password=AD_PASSWD,
+            auto_bind=ldap3.AUTO_BIND_NO_TLS) # use_ssl=True above makes it use TLS, so we don't have to use the StartTLS command in the connection.
+        self.connection.raise_exceptions = True
+
+    def create_user(self, username, email, first_name, last_name):
+        if self.email_taken(email):
+            raise ADEmailAlreadyExists()
+        elif self.username_taken(username):
+            raise ADUserAlreadyExists()
+        else:
+            # more things go here
+            cn = username
+            dn = 'cn={},{}'.format(cn, AD_USER_BASE_DN)
+            ok = self.connection.add(
+                dn,
+                [u'top', u'person', u'organizationalPerson', u'user'],
+                 {'mail': email,
+                 'sAMAccountName': username,
+                 'distinguishedName': dn,
+                 'givenName': first_name,
+                 'sn': last_name,
+                 'displayName': '{} {}'.format(first_name, last_name),
+                 'cn': cn})
+            if not ok:
+                raise ADAddFailed()
+            app.logger.debug(self.connection.response)
+            ok = self.connection.search(
+                search_base=AD_USER_BASE_DN,
+                search_filter='(sAMAccountName={})'.format(username),
+                search_scope=ldap3.SUBTREE,
+                attributes=["objectGUID"],
+            )
+            if not ok:
+                app.logger.error('Got non-SUCCESS response: {}, last_error: {}'.format(ok, self.connection.last_error))
+                app.logger.error('Last response: {}'.format(self.connection.response))
+                raise ADAddFailed()
+            return '{{{}}}'.format(uuid.UUID(bytes_le=self.connection.response[0]['attributes']['objectGUID'][0]))
+
+
+    def username_taken(self, username):
+        return self.connection.search(
+            search_base=AD_USER_BASE_DN,
+            search_filter='(sAMAccountName={})'.format(username),
+            search_scope=ldap3.SUBTREE)
+
+    def email_taken(self, email):
+        return self.connection.search(
+            search_base=AD_USER_BASE_DN,
+            search_filter='(mail={})'.format(email),
+            search_scope=ldap3.SUBTREE)
 
 def get_client(debug=False):
     return api.TokenClient(
@@ -17,11 +110,8 @@ def get_client(debug=False):
     )
 
 
-class ClientAlreadyExists(Exception):
-    pass
-
-
 def create_invoice(form):
+    ad = ActiveDirectoryClient()
     c = get_client()
 
     # Check if user exists in freshbooks
@@ -33,6 +123,11 @@ def create_invoice(form):
             'Client already exists with email {0} (checked for {1})'.format(
                 response.clients.client[0].email, form.email.data))
         raise ClientAlreadyExists()
+
+    # Try to create user in active directory
+    guid = ad.create_user(
+        username=form.username.data, email=form.email.data,
+        first_name=form.first_name.data, last_name=form.last_name.data)
 
     # If not, add client
     client = dict(
@@ -53,7 +148,7 @@ def create_invoice(form):
     lines = [
         api.types.line(
             name='ATXDUES', unit_cost='85', quantity='1',
-            description='$85 Dues for the month of ::month::'
+            description='$85 Dues for the month of ::month::\nID: {}'.format(guid)
         ),
         api.types.line(
             name='AUTOPAY', unit_cost='-25', quantity='1',
@@ -101,7 +196,7 @@ def month_left():
     days_in_month = calendar.monthrange(today.year, today.month)[1]
     left = (float(days_in_month) - (today.day - 1)) / days_in_month
     return '%.02f' % left
-    
+
 
 def install_webhooks():
     print 'installing hooks...'
