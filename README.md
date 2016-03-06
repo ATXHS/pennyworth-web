@@ -7,7 +7,7 @@ Changing the invoice amounts
 ----------------------------
 
 1. Change the values in the `create_invoice` function in
-[pennyweb/models/__init__.py](pennyweb/models/__init__.py). Be sure to change the `unit_cost` value
+[pennyweb/models/\__init__.py](pennyweb/models/__init__.py). Be sure to change the `unit_cost` value
 **and** the description to match.
 2. Change the prices mentioned in the HTML in
 [pennyweb/templates/index.html](pennyweb/templates/index.html) to match.
