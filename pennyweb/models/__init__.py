@@ -71,7 +71,8 @@ class ActiveDirectoryClient(object):
                  'givenName': first_name,
                  'sn': last_name,
                  'displayName': '{} {}'.format(first_name, last_name),
-                 'cn': cn})
+                 'cn': cn,
+            })
             if not ok:
                 raise ADAddFailed()
             app.logger.debug(self.connection.response)
@@ -147,8 +148,8 @@ def create_invoice(form):
     # Add selected invoice type for client
     lines = [
         api.types.line(
-            name='ATXDUES', unit_cost='85', quantity='1',
-            description='$85 Dues for the month of ::month::\nID: {}'.format(guid)
+            name='ATXDUES', unit_cost='95', quantity='1',
+            description='$95 Dues for the month of ::month::\nID: {}'.format(guid)
         ),
         api.types.line(
             name='AUTOPAY', unit_cost='-25', quantity='1',
@@ -165,9 +166,7 @@ Your payment is due by the 1st of the month, late by the 10th of the month.
 
 If you need more time, or have any issues please contact the Treasurer to make arrangements.
 
-Martin Bogomolni
 treasurer@atxhackerspace.org
-(512) 553-3917
 """)
 
     # Set recurring profile to send email and start on first of month
