@@ -148,12 +148,12 @@ def create_invoice(form):
     # Add selected invoice type for client
     lines = [
         api.types.line(
-            name='ATXDUES', unit_cost='95', quantity='1',
-            description='$95 Dues for the month of ::month::\nID: {}'.format(guid)
+            name='ATXDUES', unit_cost='{}'.format(app.config['MEMBERSHIP_PRICE']), quantity='1',
+            description='${} Dues for the month of ::month::\nID: {}'.format(app.config['MEMBERSHIP_PRICE'], guid)
         ),
         api.types.line(
-            name='AUTOPAY', unit_cost='-25', quantity='1',
-            description='$25 discount for Auto-Pay'
+            name='AUTOPAY', unit_cost='-{}'.format(app.config['AUTOPAY_DISCOUNT']), quantity='1',
+            description='${} discount for Auto-Pay'.format(app.config['AUTOPAY_DISCOUNT'])
         ),
     ]
     invoice=dict(

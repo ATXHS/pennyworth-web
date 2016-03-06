@@ -29,19 +29,19 @@
         </div>
       {% endfor %}
       <div class="span10 offset1">
-        You will be sent an monthly recurring invoice for $95
-        with a $25 discount for signing up for auto-pay. <b>If
-        you would like to continue to receive discount of $25 a
+        You will be sent an monthly recurring invoice for ${{ membership_price }}
+        with a ${{ autopay_discount }} discount for signing up for auto-pay. <b>If
+        you would like to continue to receive discount of ${{ autopay_discount }} a
         month, select the auto-pay option when you are making
         your first payment!</b> If you do not select the
-        auto-pay option, your second invoice will be for $85 and
+        auto-pay option, your second invoice will be for ${{ membership_price }} and
         you will need to contact treasurer@atxhackerspace.org to
         have the auto-pay discount added back to your account.
       </div>
       <div class="span10 offset1"><br \><b>To reiterate, select the option
-        labeled <em style="text-decoration: underline">"Charge the full amount ($70.00) to my credit
-        card monthly."</em> to continue being charged only $70,
-        otherwise your next invoice will be for $95
+        labeled <em style="text-decoration: underline">"Charge the full amount (${{ membership_price - autopay_discount }}.00) to my credit
+        card monthly."</em> to continue being charged only ${{ membership_price - autopay_discount }},
+        otherwise your next invoice will be for ${{ membership_price }}
         instead. </b></div>
       <div class="span10 offset1" style="font-size:larger; font-weight: bold"><br />
         The default option is to pay manually and is NOT the one

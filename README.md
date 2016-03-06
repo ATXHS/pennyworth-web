@@ -6,12 +6,15 @@ Web app for pennyworth
 Changing the invoice amounts
 ----------------------------
 
-1. Change the values in the `create_invoice` function in
-[pennyweb/models/\__init__.py](pennyweb/models/__init__.py). Be sure to change the `unit_cost` value
-**and** the description to match.
-2. Change the prices mentioned in the HTML in
-[pennyweb/templates/index.html](pennyweb/templates/index.html) to match.
+1. Change the MEMBERSHIP_PRICE and/or AUTOPAY_DISCOUNT variables in the instance/pennyweb.cfg file on the server.
+2. Restart the server by running:
 
+   ```
+   # supervisortctl stop pennyworth
+   # supervisorctl start pennyworth
+   ```
+
+   Note: something is wrong with supervisorctl and it will not exit in a reasonable amount of time. It will stop and start the service relatively quickly, though. Just verify it is down and then back up by checking the site and then CTRL-C to kill the supervisorctl command once that is done
 
 Setup
 -----

@@ -57,7 +57,7 @@ def index():
             app.logger.error(e)
             flash('There was an unexpected error adding your user account. '
                   'Please contact treasurer@atxhackerspace.org.')
-            return render_template('index.html', form=form)
+            return render_template('index.html', form=form, membership_price=app.config['MEMBERSHIP_PRICE'], autopay_discount=app.config['AUTOPAY_DISCOUNT'])
 
     return render_template('index.html', form=form)
 
