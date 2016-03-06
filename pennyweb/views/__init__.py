@@ -36,6 +36,8 @@ class InvoiceForm(Form):
 @app.route('/', methods=('GET', 'POST'))  # Receive form data and validate
 def index():
     form = InvoiceForm()
+    price = app.config['MEMBERSHIP_PRICE']
+    discount = app.config['AUTOPAY_DISCOUNT']
     if form.validate_on_submit():
         try:
             invoice_url = create_invoice(form)
@@ -44,22 +46,22 @@ def index():
         except ClientAlreadyExists:
             flash('The specified email address already exists in our system. '
                   'Contact treasurer@atxhackerspace.org.')
-            return render_template('index.html', form=form)
+            return render_template('index.html', form=form, membership_price=price, autopay_discount=discount)
         except ADUserAlreadyExists:
             flash('The specified username already exists in our system. '
                   'Please choose a different username.')
-            return render_template('index.html', form=form)
+            return render_template('index.html', form=form, membership_price=price, autopay_discount=discount)
         except ADEmailAlreadyExists:
             flash('The specified email already exists in our system. '
                   'Contact treasurer@atxhackerspace.org.')
-            return render_template('index.html', form=form)
+            return render_template('index.html', form=form, membership_price=price, autopay_discount=discount)
         except Exception, e:
             app.logger.error(e)
             flash('There was an unexpected error adding your user account. '
                   'Please contact treasurer@atxhackerspace.org.')
-            return render_template('index.html', form=form, membership_price=app.config['MEMBERSHIP_PRICE'], autopay_discount=app.config['AUTOPAY_DISCOUNT'])
+            return render_template('index.html', form=form, membership_price=price, autopay_discount=discount)
 
-    return render_template('index.html', form=form)
+    return render_template('index.html', form=form, membership_price=price, autopay_discount=discount)
 
 
 @app.route('/success')  # Woo, invoice created!
