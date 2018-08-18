@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+refreshbooks = "*"
+requests = "*"
+dateutils = "*"
+gunicorn = "*"
+"ldap3" = "*"
+Flask = "*"
+Flask-DebugToolbar = "*"
+Flask-Script = "*"
+Flask-WTF = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"

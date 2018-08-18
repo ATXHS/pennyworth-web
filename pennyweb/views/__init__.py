@@ -55,7 +55,7 @@ def index():
             flash('The specified email already exists in our system. '
                   'Contact treasurer@atxhackerspace.org.')
             return render_template('index.html', form=form, membership_price=price, autopay_discount=discount)
-        except Exception, e:
+        except Exception as e:
             app.logger.error(e)
             flash('There was an unexpected error adding your user account. '
                   'Please contact treasurer@atxhackerspace.org.')

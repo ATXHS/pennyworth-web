@@ -1,7 +1,6 @@
 import calendar
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from string import lower
 
 import ldap3
 import uuid
@@ -64,7 +63,7 @@ class ActiveDirectoryClient(object):
             dn = 'cn={},{}'.format(cn, AD_USER_BASE_DN)
             ok = self.connection.add(
                 dn,
-                [u'top', u'person', u'organizationalPerson', u'user'],
+                ['top', 'person', 'organizationalPerson', 'user'],
                  {'mail': email,
                  'sAMAccountName': username,
                  'distinguishedName': dn,
@@ -198,16 +197,16 @@ def month_left():
 
 
 def install_webhooks():
-    print 'installing hooks...'
+    print('installing hooks...')
     c = get_client()
     response = c.callback.create(callback=dict(
         event='payment.create',
         uri=url_for('freshbooks_webhook', _external=True)
     ))
     if response.attrib['status'] == 'ok':
-        print 'webhook created successfully'
+        print('webhook created successfully')
     else:
-        print 'failed to add webhook'
+        print('failed to add webhook')
 
 
 def verify_callback(data):

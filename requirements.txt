@@ -1,9 +1,0 @@
-refreshbooks
-requests
-Flask
-Flask-DebugToolbar
-Flask-Script
-Flask-WTF
-dateutils
-gunicorn
-ldap3

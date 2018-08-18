@@ -19,17 +19,17 @@ Changing the invoice amounts
 Setup
 -----
 
-1. Install virtualenv and virtualenv-wrapper
-2. mkvirtualenv pennyweb (in the future "workon pennyweb")
-3. cd /path/to/pennyworth-web
-3. pip install -r requirements.txt
-4. python setup.py develop
-5. mkdir instance
-6. cp pennyweb/default_settings.py instance/pennyweb.cfg
+1. Install pipenv
+2. `cd /path/to/pennyworth-web`
+3. `pipenv shell`
+4. `pipenv install`
+5. `python setup.py develop`
+6. `mkdir instance`
+7. `cp pennyweb/default_settings.py instance/pennyweb.cfg`
 
 Running
 -------
 
-1. Make sure pennyweb virtualenv is activated ("workon pennyweb")
+1. Make sure pennyweb virtualenv is activated (`pipenv shell`)
 2. Make sure you are in the pennyworth-web directory
-3. run "manage-pennyweb runserver"
+3. run `manage-pennyweb runserver`
