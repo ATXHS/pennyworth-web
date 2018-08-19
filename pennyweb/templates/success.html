@@ -3,11 +3,22 @@
 {% block title %}Thanks!{% endblock %}
 
 {% block content %}
-        <div class="span8 offset2">
-          <h1>Invoice request sent</h1>
-          You should be receiving your invoice via email shortly.<br\>
-          You can pay now by visiting the invoice page:
-          <a class="btn btn-primary" href="{{ invoice_url }}">Pay invoice now</a>
-          <a class="btn btn-info" href="{{ url_for('index') }}">Back to the signup page</a>
-        </div>
+  <div class="col">
+    <h1>Invoice request sent</h1>
+    <p>You should be receiving your invoice via email shortly.</p>
+    <p>You can pay now by visiting the invoice page:</p>
+    <p><a class="btn btn-primary" href="{{ invoice_url }}">Pay invoice now</a></p>
+
+    <h2>Next Step: Orientation</h2>
+    <p>
+      After you've paid your invoice you'll need to attend orientation.
+      You'll receive your key fob for door access, learn about the space's
+      policies and classes.
+    </p>
+    <p>
+      Orientation is every Tuesday evening at 7pm. If you are unable to attend
+      on a Tuesday email the Director of Operations at <a href="mailto:ops@atxhs.org">ops@atxhs.org</a> to schedule
+      a different time.
+    </p>
+  </div>
 {% endblock %}
