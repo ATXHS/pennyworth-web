@@ -10,7 +10,7 @@ Changing the invoice amounts
 2. Restart the server by running:
 
    ```
-   # supervisortctl stop pennyworth
+   # supervisorctl stop pennyworth
    # supervisorctl start pennyworth
    ```
 

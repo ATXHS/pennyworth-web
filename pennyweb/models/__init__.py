@@ -8,6 +8,7 @@ from refreshbooks import api
 from flask import url_for
 from pennyweb import app
 
+AD_ENABLE = app.config['AD_ENABLE']
 AD_USER = app.config['AD_USER']
 AD_PASSWD = app.config['AD_PASSWD']
 SERVER_LIST = app.config['AD_SERVER_LIST']
@@ -111,7 +112,9 @@ def get_client(debug=False):
 
 
 def create_invoice(form):
-    ad = ActiveDirectoryClient()
+    if AD_ENABLE:
+        ad = ActiveDirectoryClient()
+
     c = get_client()
 
     # Check if user exists in freshbooks
@@ -125,9 +128,12 @@ def create_invoice(form):
         raise ClientAlreadyExists()
 
     # Try to create user in active directory
-    guid = ad.create_user(
-        username=form.username.data, email=form.email.data,
-        first_name=form.first_name.data, last_name=form.last_name.data)
+    if AD_ENABLE:
+        guid = ad.create_user(
+            username=form.username.data, email=form.email.data,
+            first_name=form.first_name.data, last_name=form.last_name.data)
+    else:
+        guid = 'Default'
 
     # If not, add client
     client = dict(
